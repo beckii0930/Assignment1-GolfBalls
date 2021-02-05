@@ -57,8 +57,10 @@ Here's the pseudocode. Your job is to flesh it out, run it for at least 3 test s
 # Do the following repeatedly, for each test statistic that you use.
 
 # 1 Pick a test statistic. An example might be to use the range between the highest and lowest number in the four cells of the table.
+# The test statistics are mean (chi-square) / the least common ball (min freq), is the min count reasonable? / variance/ the most common ball (max freq), is the max count reasonable?
 
 # 2. We then find the behavior of the test statistic under the null hypothesis that all numbers are equally likely by repeatedly doing the following (say 10000 times):
+
 # 2a. Generate a simulated dataset of the same size as the one we observed. So, in this example it will contain 486 simulated golf-balls, # with the number of each being sampled from a discrete uniform distribution DU[1,4].
 # 2b. Calculate the value of the test statistic for that simulated dataset (so here, we construct a table of frequencies, just like for the observed data, and then take the difference between the larget and smallest numbers in that table). Store this value.
 
@@ -69,3 +71,48 @@ Here's the pseudocode. Your job is to flesh it out, run it for at least 3 test s
 # 5. If the observed test statistic value falls in the tails of the null distribution plotted in step 3, (quantify this using the percentile of that value in the null distribution - known as the p-value) we reject the null hypothesis that the numbers on the balls are uniformly distributed.
 
 ```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r globals}
+## null hypothesis: all th numbers are equally likely
+NumberOfSims <- 10000
+golfMean <- rep(0,NumberOfSims)
+golfMedian <- rep(0,NumberOfSims)
+golfStd <- rep(0,NumberOfSims)
+for (sim in 1:NumberOfSims){
+  DataSize <- 486
+  #randomNumbers <- rep(0,DataSize)
+  #for (i in 1:DataSize) { 
+    #randomNumbers[i] <- ceiling(runif(1, 1, 4))
+  #}
+  randomNumbers <- sample(1:4, DataSize,replace = TRUE)
+  golfMean[sim] <- mean(randomNumbers)
+  golfMedian[sim] <- median(randomNumbers)
+  golfStd[sim] <- sd(randomNumbers)
+}
+hist(golfMean, xlim = c(1,4))
+hist(golfMedian, xlim = c(1,4))
+hist(golfStd, xlim = c(1,1.4))
+
+
+# our dataset
+ourData<- rep(1, DataSize)
+for (i in 1:138){
+  ourData[137+i] = 2
+}
+for (i in 1:107){
+  ourData[137+138+i] = 3
+}
+for (i in 1:107){
+  ourData[137+138+107+i] = 4
+}
+dataMean <- mean(ourData)
+dataMedian <- median(ourData)
+dataStd <- sd(ourData)
+
+# it seems to be uniformly distributed because it the test statistics does not fall into the tail.
+```
+
