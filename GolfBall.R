@@ -38,3 +38,4 @@ pVar <- sum((golfVar > dataVar))/NumberOfSims
 nullprobs<- c(.25,.25,.25,.25)
 (Xsq <- chisq.test(ourData, p=nullprobs))  # Prints test summary
 
+

@@ -1,6 +1,9 @@
 ---
 title: "Assignment 1 -- Golf Ball Statistics"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
 ---
 
 ---
