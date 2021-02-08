@@ -38,9 +38,8 @@ We are interested in the following:
 
 ***0. Test statistics***
 
-In order to investgate the distribution of the golf ball numbers, we can test if the golf ball numbers, 1, 2, 3, 4 have equal chance of occurring. In this report, a simulation-based hypothesis test is conducted. The test statistics chosen in this report are:    
+In order to investigate the distribution of the golf ball numbers, we can test if the golf ball numbers, 1, 2, 3, 4 have equal chance of occurring. In this report, a simulation-based hypothesis test is conducted. The test statistics chosen in this report are:    
 
-* The average number of golf ball numbers
 * The minimum frequency of golf ball numbers
 * The maximum frequency of golf ball numbers
 * The variance of frequency among golf ball numbers     
@@ -49,18 +48,18 @@ _The null hypothesis_: all numbers 1, 2, 3, 4 are equally distributed.
 
 _The alternative hypothesis_: the numbers 1, 2, 3, 4 are not equally distributed.
 
-Though we can use chi-square test to test whether the numbers are evenly distributed, in this project, we will only focus on using simulation to test for the significance of the associated test statistic.
+Though we can use chi-square test to test whether the numbers are evenly distributed, we will first focus on using simulation to test for the significance of the associated test statistics and compare the results with that of chi-square test.
 
 ***1. Simulation***
 
-First, 10000 simulations for each test statistic are created to find out their behavior under null hypothesis. In each simulation, we used a random number generator to sample 486 numbers among integers 1 through 4. These numbers follow a discrete uniform distribution according to the null hypothesis. Then, all 4 test statistics are calculated for the simulated data.
+First, 10000 simulations for each test statistic are created to find out their behavior under null hypothesis. In each simulation, we used a random number generator to sample 486 numbers among integers 1 through 4. These numbers follow a discrete uniform distribution according to the null hypothesis. Then, all 3 test statistics are calculated for the simulated data.
 
 ```{r}
 # null hypothesis: all the numbers are equally likely
 set.seed(123)
 NumberOfSims <- 10000
 DataSize <- 486
-golfMean <- rep(0,NumberOfSims) #The average number
+
 golfMinFreq <- rep(0,NumberOfSims) # The minimum frequency of golf ball numbers
 golfMaxFreq <- rep(0,NumberOfSims) # The maximum frequency of golf ball numbers
 golfVar<- rep(0,NumberOfSims) # The variance of frequency among golf ball numbers     
@@ -68,7 +67,6 @@ golfVar<- rep(0,NumberOfSims) # The variance of frequency among golf ball number
 # Generate test statistics under null hypothesis
 for (sim in 1:NumberOfSims){
   randomNumbers <- sample(1:4, DataSize,replace = TRUE)
-  golfMean[sim] <- mean(randomNumbers)
   golfMinFreq[sim] <- min(table(randomNumbers))
   golfMaxFreq[sim] <- max(table(randomNumbers))
   golfVar[sim] <- var(table(randomNumbers))
@@ -77,11 +75,11 @@ for (sim in 1:NumberOfSims){
 ```
 
 
-Here is a table showing the first few entries in the simulated data. The table has 10000 rows and 4 columns. The rows correspond to the number of simulation and each column corresponds to the average number of golf ball number, the minimum frequency of golf ball numbers, maximum frequency of golf ball numbers, and the variance of frequency among golf ball numbers, in order.
+Here is a table showing the first few entries in the simulated data. The table has 10000 rows and 3 columns. The rows correspond to the number of simulation and each column corresponds to the minimum frequency of golf ball numbers, maximum frequency of golf ball numbers, and the variance of frequency among golf ball numbers, in order.
 ```{r}
 # Create a summary data
-df <- matrix(c(golfMean, golfMinFreq, golfMaxFreq, golfVar), nrow = NumberOfSims, ncol = 4)
-colnames(df) <- c("mean", "min", "max", "variance")
+df <- matrix(c(golfMinFreq, golfMaxFreq, golfVar), nrow = NumberOfSims, ncol = 3)
+colnames(df) <- c("min", "max", "variance")
 rownames(df) <- 1:NumberOfSims
 df <- as.table(df)
 head(df)
@@ -90,27 +88,19 @@ head(df)
 
 ***2. Observed Data***
 
-Second, all 4 test statistics are calculated for the observed data. 
+Second, all 3 test statistics are calculated for the observed data. The results are displayed below. The minimum frequency of golf ball numbers is **104**, the maximum frequency of golf ball numbers is **138**, and the variance of frequency among golf ball numbers is **343**.
 ```{r}
 # our dataset
 ourData<- c(137, 138, 107, 104)
-dataMean <- 0
-for (i in 1:4) {
-  dataMean = dataMean + i*ourData[i]
-}
 
 # Calculate observed data test statistics value
-dataMean = dataMean / DataSize
 dataMinFreq <- min(ourData)
 dataMaxFreq <- max(ourData)
 dataVar <- var(ourData)
-```
 
-The results are displayed below. The average number of golf ball number is **2.366255**, the minimum frequency of golf ball numbers is **104**, the maximum frequency of golf ball numbers is **138**, and the variance of frequency among golf ball numbers is **343**.
-```{r}
 # Print as table
-dfData <- matrix(c(dataMean, dataMinFreq, dataMaxFreq, dataVar), nrow = 1, ncol=4)
-colnames(dfData) <- c("mean", "min", "max", "variance")
+dfData <- matrix(c(dataMinFreq, dataMaxFreq, dataVar), nrow = 1, ncol=3)
+colnames(dfData) <- c("min", "max", "variance")
 rownames(dfData) <- 1
 dfData <- as.table(dfData)
 dfData
@@ -119,17 +109,14 @@ dfData
 
 ***3. p-value Calculation***
 
-p-values for observed test statistics are calculated below. The p-value shows how likely are the observed golf ball counts, or to observe counts that are more extreme than the observed counts under the null hypothesis.     
+p-values for each test statistics are calculated below. The p-value shows how likely are the observed golf ball counts, or to observe counts that are more extreme than the observed counts under the null hypothesis.     
 
 For the **minimum frequency of golf numbers**, we count the numbers that are smaller than the observed minimum frequency, **104**, and divide this by the total number of simulations, **10000**. Similarly, for the **maximum frequency of golf numbers**, we count the numbers that are larger than the observed maximum frequency, **138**, and divide this by the total number of simulations. Last, for the **variance of frequency among golf numbers**, we count the variances that are larger than the observed variance, **343**, and divide this by the total number of simulations.
 
 ```{r}
 # Calculated p-value by calculating the probability of encountering values more extreme than observed
 
-# ??????????? unsure about the mean?
-pMean <- sum((golfMean > dataMean))/NumberOfSims
-
-# Sum over all the values that are more extreme than expected and average over num of Simulations
+# Sum overthe values that are more extreme than expected and average over total number of Simulations to obtain p-value
 pMinFreq <- sum((golfMinFreq < dataMinFreq))/NumberOfSims
 pMaxFreq <- sum((golfMaxFreq > dataMaxFreq))/NumberOfSims
 pVar <- sum((golfVar > dataVar))/NumberOfSims
@@ -138,8 +125,8 @@ pVar <- sum((golfVar > dataVar))/NumberOfSims
 The calculated p-values for each statistic are displayed in the table below.
 ```{r}
 # Print as table
-dfP <- matrix(c(pMean, pMinFreq, pMaxFreq, pVar), nrow = 1, ncol=4)
-colnames(dfP) <- c("pval-mean", "pval-min", "pval-max", "pval-variance")
+dfP <- matrix(c(pMinFreq, pMaxFreq, pVar), nrow = 1, ncol=3)
+colnames(dfP) <- c("pval-min", "pval-max", "pval-variance")
 rownames(dfP) <- 1
 dfP <- as.table(dfP)
 dfP
@@ -148,15 +135,11 @@ dfP
 
 ***4. Histograms***
 
-Last, 4 histograms are created for each of the test statistics. The observed test statistic is plotted along with each histogram to show its value as well as its p-value.
+Next, 3 histograms are created for each of the test statistics. The observed test statistic is plotted along with each histogram to show its value as well as its p-value.
 
 ```{r}
 
 # histogram plot highlighting the observed value
-hist(golfMean, main="Mean Value of Golf Ball Number", col = "grey40", xlab="Mean", ylab="Count")
-abline(v=dataMean, col='#AFAFFF', lwd=2)
-text(2.37,1200,paste("test statistics =",signif(dataMean, 4)," \n\n pvalue = ", pMean), col="grey40",font=2)
-
 hist(golfMinFreq, main="Min Value among Golf Balls Counts", col = "grey40", xlab="Min", ylab="Count")
 abline(v=dataMinFreq, col='#AFAFFF', lwd=2)
 text(98,1200,paste("test statistics =",dataMinFreq," \n pvalue = ", pMinFreq), col="grey40",font=2)
@@ -170,6 +153,17 @@ abline(v=dataVar, col='#AFAFFF', lwd=2)
 text(490,1500,paste("test statistics =",dataVar," \n pvalue = ", pVar), col="grey40",font=2)
 ```
 
+***5. Chi-square test***
+To assess the results of the chosen test statistics, the chi-square test is performed on the golf number counts. The observed counts are used as input to test against the null hypothesis. Since we assume a uniform distribution for the golf number count distribution under the null hypothesis, the probability of each golf number appearing is 0.25. The p-value for the test is calculated to be **0.03725**.
+
+```{r}
+# Assume uniform distribution under null hypothesis, each number 1 through 4 have the same probability
+nullprobs<- c(.25,.25,.25,.25) 
+(Xsq <- chisq.test(ourData, p=nullprobs))  
+
+# Prints test summary
+Xsq
+```
 
 ## III. Analysis
 
@@ -179,11 +173,13 @@ When the **minimum frequency** of golf balls among the 486 balls is used as the 
 
 Similarly, when the **maximum frequency** of golf balls among the 486 balls is used as the test statistics, 10000 simulations are performed and the 10000 simulated  maximum frequency of golf balls are plotted into a histogram. The observed test statistics is calculated to be 138 and its p-value is calculated to be **0.1550**. Therefore, using a common p-value cutoff of 0.05, _we failed to reject the null hypothesis that the numbers 1, 2, 3, 4 are equally distributed_.
 
-Finally, when the **variance of frequency** among golf balls among the 486 balls is used as the test statistics, 10000 simulations are performed and the 10000 simulated variance of frequency among golf balls are plotted into a histogram. The observed test statistics is calculated to be 343 and its p-value is calculated to be **0.0373**. Therefore, using a common p-value cutoff of 0.05, we reject the null hypothesis that the numbers 1, 2, 3, 4 are equally distributed and _conclude that the numbers are equally distributed_.
+Finally, when the **variance of frequency** among golf balls among the 486 balls is used as the test statistics, 10000 simulations are performed and the 10000 simulated variance of frequency among golf balls are plotted into a histogram. The observed test statistics is calculated to be 343 and its p-value is calculated to be **0.0373**. Therefore, using a common p-value cutoff of 0.05, we reject the null hypothesis that the numbers 1, 2, 3, 4 are equally distributed and _conclude that the numbers are not equally distributed_.
+
+The test statistics **minimum frequency** and **maximum frequency** among golf balls both have a p-value greater than 0.05 so we failed to reject the null hypothesis. The test statistic **variance of frequency** among golf balls has a small p-value that allows us to reject the null hypothesis and accept the alternative hypothesis. Moreover, the p-value of this test statistic, **0.0373**, is very close to that calculated from the chi-square test, **0.03725**. One explanation is that the first two test statistics does not accurately describe the distribution of the numbers and the last test statistics has more power.
 
 ## IV. Conclusion
 
 ---
 
-What to conclude? We should reject because 2 out of 3 tset statistics, we failed to reject the null hypothesis??????
+In this project, we analyzed whether the golf ball numbers are evenly distributed given the counts of each number. 3 test statistics were chosen: the **minimum frequency** and **maximum frequency** of golf balls among the 486 balls, and the **variance of frequency** among golf balls. Then, 10000 rounds of simulations were run to obtain the p-value for each test statistics. Next, histograms were plotted to show the distribution of the test statistics from the simulation. The p-values for each test statistics were calculated. Last, these values were compared with the results of the theoretical test, the chi-squared test. The first 2 test statistics have large p-values so that we failed to reject the null hypothesis. However, the  **variance of frequency** among golf balls test statistics achieved a small p-value that allows us to reject the null hypothesis. Moreover, it has a similar p-value to that of the chi-squared test. Thus, we reject the null hypothesis and conclude that the golf ball numbers are not evenly distributed. 
 
